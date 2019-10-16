@@ -1,0 +1,8 @@
+{
+    # create the ipset jail in iptables
+    foreach my $set (split ("\n", `ipset -L -name`)) {
+        next if ($set !~ m/^f2b-/);
+        $OUT .= "system(\"/usr/sbin/ipset -quiet -exist create $set hash:ip timeout 600 \");\n";
+    }
+    $OUT .= '1;';
+}
