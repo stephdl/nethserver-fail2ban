@@ -18,6 +18,8 @@ templates2events('/etc/fail2ban/filter.d/urbackup-auth.conf', $event);
 
 # nethserver-firewall-base-save
 my $event = 'nethserver-firewall-base-save';
+event_actions($event,
+             'nethserver-fail2ban-restart' => '10');
 templates2events('/etc/shorewall/initdone', $event);
 templates2events('/etc/shorewall/blrules', $event);
 templates2events('/etc/fail2ban/jail.local', $event);
@@ -45,7 +47,7 @@ foreach my $event (qw (
 }
 
 # Fail2ban services restart
-foreach my $event (qw ( nethserver-firewall-base-save
+foreach my $event (qw ( 
                         nethserver-fail2ban-save
                         nethserver-urbackup-save
                         nethserver-urbackup-update

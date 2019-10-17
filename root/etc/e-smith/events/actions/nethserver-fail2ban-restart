@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+# restart fail2ban before shorewall
+/usr/bin/systemctl restart fail2ban
