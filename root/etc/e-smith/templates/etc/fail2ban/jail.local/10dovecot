@@ -5,7 +5,7 @@
     return ("\n#dovecot not used on this server\n") if (! NethServer::Fail2Ban::listDovecotJails());
 
     foreach (NethServer::Fail2Ban::listDovecotJails()) {
-        $OUT .= "[$_]\n";
+        $OUT .= "\n[$_]\n";
         $OUT .= "enabled = true\n";
         $OUT .= "port = $port\n";
         $OUT .= "logpath = /var/log/imap\n";

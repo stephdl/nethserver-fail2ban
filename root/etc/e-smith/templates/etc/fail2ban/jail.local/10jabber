@@ -5,7 +5,7 @@
     return ("\n#ejabberd not used on this server\n") if (!NethServer::Fail2Ban::listEjabberAuthJails());
 
     foreach (NethServer::Fail2Ban::listEjabberAuthJails()) {
-        $OUT .= "[$_]\n";
+        $OUT .= "\n[$_]\n";
         $OUT .= "enabled = true\n";
         $OUT .= "port = $port\n";
         $OUT .= "logpath = /var/log/ejabberd/ejabberd.log\n";

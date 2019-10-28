@@ -6,7 +6,7 @@
     return ("\n#sshd not used on this server\n") if (! NethServer::Fail2Ban::listSSHJails());
 
     foreach (NethServer::Fail2Ban::listSSHJails()) {
-        $OUT .= "[$_]\n";
+        $OUT .= "\n[$_]\n";
         $OUT .= "enabled = true\n";
         $OUT .= "port = $port\n";
         $OUT .= "logpath = \%(sshd_log)s\n";

@@ -6,7 +6,7 @@
     return ("\n#asterisk not used on this server\n") if (! NethServer::Fail2Ban::listAsteriskJails());
 
     foreach (NethServer::Fail2Ban::listAsteriskJails()) {
-        $OUT .= "[$_]\n";
+        $OUT .= "\n[$_]\n";
         $OUT .= "enabled = true\n";
         $OUT .= "port = $port\n";
         $OUT .= "logpath = /var/log/asterisk/full\n";
