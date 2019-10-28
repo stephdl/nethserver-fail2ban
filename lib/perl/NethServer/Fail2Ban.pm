@@ -60,9 +60,10 @@ sub listEjabberAuthJails {
     my $db = esmith::ConfigDB->open_ro();
     my $ejabberd = $db->get_prop('ejabberd', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'EjabberAuth_status') || 'true';
-    return ("\n#ejabberd not used on this server\n") if ($ejabberd eq 'disabled' || $status eq 'false');
 
-    if (( -f '/var/log/ejabberd/ejabberd.log') &&  ($status eq 'true')) {
+    if (( -f '/var/log/ejabberd/ejabberd.log') &&  
+      ($status eq 'true') && 
+      ($ejabberd eq 'enabled')) {
         push(@jails, 'ejabberd-auth');
     }
     return @jails;
@@ -151,7 +152,7 @@ sub listApacheAccessJails {
     my $db = esmith::ConfigDB->open_ro();
     my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
     my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
-    return ("\n#sshd not used on this server\n") if ($httpd eq 'disabled' || $apache eq 'false');
+    return ("\n#apache not used on this server\n") if ($httpd eq 'disabled' || $apache eq 'false');
 
     if (-f '/var/log/httpd/access_log') {
         foreach(qw(fakegooglebot badbots)) {

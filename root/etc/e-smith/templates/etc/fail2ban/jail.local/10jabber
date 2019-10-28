@@ -2,6 +2,7 @@
     use NethServer::Fail2Ban;
     my $port = $ejabberd{TCPPorts} || '5222,5223,5280';
     my $maxretry = $fail2ban{Ejabber_MaxRetry} || $fail2ban{MaxRetry} || '3';
+    return ("\n#ejabberd not used on this server\n") if (!NethServer::Fail2Ban::listEjabberAuthJails());
 
     foreach (NethServer::Fail2Ban::listEjabberAuthJails()) {
         $OUT .= "[$_]\n";
