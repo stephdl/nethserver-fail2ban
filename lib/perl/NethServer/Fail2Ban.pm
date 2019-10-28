@@ -47,8 +47,25 @@ sub listAllJails {
     push(@jails, listApacheAccessJails());
     push(@jails, listSSHJails());
     push(@jails, listAsteriskJails());
+    push(@jails, listDovecotJails());
     # ... other jails
 
+    return @jails;
+}
+sub listDovecotJails {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $dovecot = $db->get_prop('dovecot', 'status') || 'enabled';
+    my $status = $db->get_prop('fail2ban', 'Dovecot_status') || 'true';
+    return ("\n#dovecot not used on this server\n") if ($dovecot eq 'disabled' || $status eq 'false');
+
+    if ( -f '/var/log/imap') {
+        foreach (qw( dovecot dovecot-nethserver )) {
+            if ($status eq 'true') {
+                push(@jails, $_);
+            }
+        }
+    }
     return @jails;
 }
 
@@ -57,13 +74,12 @@ sub listAsteriskJails {
     my $db = esmith::ConfigDB->open_ro();
     my $asterisk = $db->get_prop('asterisk', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'AsteriskAuth_status') || 'true';
-    return ("\n#asterisk not used on this server") if ($asterisk eq 'disabled' || $status eq 'false');
+    return ("\n#asterisk not used on this server\n") if ($asterisk eq 'disabled' || $status eq 'false');
 
     if ( -f '/var/log/asterisk/full') {
         foreach (qw( asterisk asterisk_nethserver )) {
-            my $status = $db->get_prop('fail2ban', 'AsteriskAuth_status') || 'true';
             if ($status eq 'true') {
-                push(@jails, 'apache-'.$_);
+                push(@jails, $_);
             }
         }
     }
@@ -75,7 +91,7 @@ sub listSSHJails {
     my $db = esmith::ConfigDB->open_ro();
     my $sshd = $db->get_prop('sshd', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'Sshd_status') || 'true';
-    return ("\n#sshd not used on this server") if ($sshd eq 'disabled' || $status eq 'false');
+    return ("\n#sshd not used on this server\n") if ($sshd eq 'disabled' || $status eq 'false');
 
     if (( -f '/var/log/secure') &&  ($status eq 'true')) {
         push(@jails, 'sshd');
@@ -88,7 +104,7 @@ sub listApacheErrorJails {
     my $db = esmith::ConfigDB->open_ro();
     my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
     my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
-    return ("\n#apache not used on this server") if ($httpd eq 'disabled' || $apache eq 'false');
+    return ("\n#apache not used on this server\n") if ($httpd eq 'disabled' || $apache eq 'false');
 
     if ( -f '/var/log/httpd/error_log') {
         foreach (qw(auth noscript overflows nohome botsearch modsecurity shellshock scan )) {
@@ -106,7 +122,7 @@ sub listApacheAccessJails {
     my $db = esmith::ConfigDB->open_ro();
     my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
     my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
-    return ("\n#sshd not used on this server") if ($httpd eq 'disabled' || $apache eq 'false');
+    return ("\n#sshd not used on this server\n") if ($httpd eq 'disabled' || $apache eq 'false');
 
     if (-f '/var/log/httpd/access_log') {
         foreach(qw(fakegooglebot badbots)) {
