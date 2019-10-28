@@ -55,13 +55,13 @@ sub listAllJails {
 sub listAsteriskJails {
     my @jails;
     my $db = esmith::ConfigDB->open_ro();
-    my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
-    my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
-    return ("\n#apache not used on this server") if ($httpd eq 'disabled' || $apache eq 'false');
+    my $asterisk = $db->get_prop('asterisk', 'status') || 'enabled';
+    my $status = $db->get_prop('fail2ban', 'AsteriskAuth_status') || 'true';
+    return ("\n#asterisk not used on this server") if ($asterisk eq 'disabled' || $status eq 'false');
 
-    if ( -f '/var/log/httpd/error_log') {
-        foreach (qw(auth noscript overflows nohome botsearch modsecurity shellshock scan )) {
-            my $status = $db->get_prop('fail2ban', 'Apache'.$_.'_status') || 'true';
+    if ( -f '/var/log/asterisk/full') {
+        foreach (qw( asterisk asterisk_nethserver )) {
+            my $status = $db->get_prop('fail2ban', 'AsteriskAuth_status') || 'true';
             if ($status eq 'true') {
                 push(@jails, 'apache-'.$_);
             }
