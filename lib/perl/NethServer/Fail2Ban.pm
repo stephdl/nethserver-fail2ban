@@ -48,10 +48,25 @@ sub listAllJails {
     push(@jails, listSSHJails());
     push(@jails, listAsteriskJails());
     push(@jails, listDovecotJails());
+    push(@jails, listHttpdAdminJails());
     # ... other jails
 
     return @jails;
 }
+
+sub listHttpdAdminJails {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $httpd_admin = $db->get_prop('httpd-admin', 'status') || 'enabled';
+    my $status = $db->get_prop('fail2ban', 'HttpdAdmin_status') || 'true';
+    return ("\n#httpd-admin not used on this server\n") if ($httpd_admin eq 'disabled' || $status eq 'false');
+
+    if (( -f '/var/log/httpd-admin/access_log') &&  ($status eq 'true')) {
+        push(@jails, 'httpd-admin');
+    }
+    return @jails;
+}
+
 sub listDovecotJails {
     my @jails;
     my $db = esmith::ConfigDB->open_ro();
