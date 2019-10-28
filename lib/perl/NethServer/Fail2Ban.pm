@@ -74,9 +74,10 @@ sub listHttpdAdminJails {
     my $db = esmith::ConfigDB->open_ro();
     my $httpd_admin = $db->get_prop('httpd-admin', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'HttpdAdmin_status') || 'true';
-    return ("\n#httpd-admin not used on this server\n") if ($httpd_admin eq 'disabled' || $status eq 'false');
 
-    if (( -f '/var/log/httpd-admin/access_log') &&  ($status eq 'true')) {
+    if (( -f '/var/log/httpd-admin/access_log') &&
+      ($status eq 'true') && 
+      ($httpd_admin eq 'enabled')) {
         push(@jails, 'httpd-admin');
     }
     return @jails;
@@ -87,11 +88,10 @@ sub listDovecotJails {
     my $db = esmith::ConfigDB->open_ro();
     my $dovecot = $db->get_prop('dovecot', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'Dovecot_status') || 'true';
-    return ("\n#dovecot not used on this server\n") if ($dovecot eq 'disabled' || $status eq 'false');
 
     if ( -f '/var/log/imap') {
         foreach (qw( dovecot dovecot-nethserver )) {
-            if ($status eq 'true') {
+            if (($status eq 'true') && ($dovecot eq 'enabled')) {
                 push(@jails, $_);
             }
         }
@@ -104,11 +104,10 @@ sub listAsteriskJails {
     my $db = esmith::ConfigDB->open_ro();
     my $asterisk = $db->get_prop('asterisk', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'AsteriskAuth_status') || 'true';
-    return ("\n#asterisk not used on this server\n") if ($asterisk eq 'disabled' || $status eq 'false');
 
     if ( -f '/var/log/asterisk/full') {
         foreach (qw( asterisk asterisk_nethserver )) {
-            if ($status eq 'true') {
+            if (($status eq 'true') && ($asterisk eq 'enabled')){
                 push(@jails, $_);
             }
         }
@@ -121,9 +120,10 @@ sub listSSHJails {
     my $db = esmith::ConfigDB->open_ro();
     my $sshd = $db->get_prop('sshd', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'Sshd_status') || 'true';
-    return ("\n#sshd not used on this server\n") if ($sshd eq 'disabled' || $status eq 'false');
 
-    if (( -f '/var/log/secure') &&  ($status eq 'true')) {
+    if (( -f '/var/log/secure') &&
+      ($status eq 'true') && 
+      ($sshd eq 'enabled')) {
         push(@jails, 'sshd');
     }
     return @jails;

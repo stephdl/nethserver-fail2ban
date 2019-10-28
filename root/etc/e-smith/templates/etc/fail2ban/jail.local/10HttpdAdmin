@@ -2,6 +2,7 @@
     use NethServer::Fail2Ban;
     my $port = ${'httpd-admin'}{TCPPort} || '980';
     my $maxretry = $fail2ban{HttpdAdmin_MaxRetry} || $fail2ban{MaxRetry} || '3';
+    return ("\n#httpd-admin not used on this server\n") if (! NethServer::Fail2Ban::listHttpdAdminJails());
 
     foreach (NethServer::Fail2Ban::listHttpdAdminJails()) {
         $OUT .= "[$_]\n";

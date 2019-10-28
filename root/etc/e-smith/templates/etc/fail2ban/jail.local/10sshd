@@ -3,6 +3,7 @@
     use NethServer::Fail2Ban;
     my $port = $sshd{TCPPort} || '22';
     my $maxretry = $fail2ban{Sshd_MaxRetry} || $fail2ban{MaxRetry} || '3';
+    return ("\n#sshd not used on this server\n") if (! NethServer::Fail2Ban::listSSHJails());
 
     foreach (NethServer::Fail2Ban::listSSHJails()) {
         $OUT .= "[$_]\n";
