@@ -49,8 +49,22 @@ sub listAllJails {
     push(@jails, listAsteriskJails());
     push(@jails, listDovecotJails());
     push(@jails, listHttpdAdminJails());
+    push(@jails, listEjabberAuthJails());
     # ... other jails
 
+    return @jails;
+}
+
+sub listEjabberAuthJails {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $ejabberd = $db->get_prop('ejabberd', 'status') || 'enabled';
+    my $status = $db->get_prop('fail2ban', 'EjabberAuth_status') || 'true';
+    return ("\n#ejabberd not used on this server\n") if ($ejabberd eq 'disabled' || $status eq 'false');
+
+    if (( -f '/var/log/ejabberd/ejabberd.log') &&  ($status eq 'true')) {
+        push(@jails, 'ejabberd-auth');
+    }
     return @jails;
 }
 
