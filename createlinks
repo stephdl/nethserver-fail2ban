@@ -12,6 +12,9 @@ templates2events('/etc/sudoers', $event);
 templates2events('/etc/fail2ban/jail.local', $event);
 templates2events('/etc/fail2ban/filter.d/urbackup-auth.conf', $event);
 
+templates2events('/etc/shorewall/initdone', $event);
+templates2events('/etc/shorewall/blrules', $event);
+
 
 
 
@@ -24,6 +27,9 @@ templates2events('/etc/shorewall/initdone', $event);
 templates2events('/etc/shorewall/blrules', $event);
 templates2events('/etc/fail2ban/jail.local', $event);
 templates2events('/etc/fail2ban/filter.d/urbackup-auth.conf', $event);
+
+templates2events('/etc/shorewall/initdone', $event);
+templates2events('/etc/shorewall/blrules', $event);
 
 #Action to unbanIP
 my $event = 'nethserver-fail2banUnBan-save';
