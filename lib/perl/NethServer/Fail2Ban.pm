@@ -134,12 +134,11 @@ sub listApacheErrorJails {
     my $db = esmith::ConfigDB->open_ro();
     my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
     my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
-    return ("\n#apache not used on this server\n") if ($httpd eq 'disabled' || $apache eq 'false');
 
     if ( -f '/var/log/httpd/error_log') {
         foreach (qw(auth noscript overflows nohome botsearch modsecurity shellshock scan )) {
             my $status = $db->get_prop('fail2ban', 'Apache'.$_.'_status') || 'true';
-            if ($status eq 'true') {
+            if (($status eq 'true') && ($httpd eq 'enabled')) {
                 push(@jails, 'apache-'.$_);
             }
         }
@@ -152,17 +151,16 @@ sub listApacheAccessJails {
     my $db = esmith::ConfigDB->open_ro();
     my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
     my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
-    return ("\n#apache not used on this server\n") if ($httpd eq 'disabled' || $apache eq 'false');
 
     if (-f '/var/log/httpd/access_log') {
         foreach(qw(fakegooglebot badbots)) {
             my $status = $db->get_prop('fail2ban', 'Apache'.$_.'_status') || 'true';
-            if ($status eq 'true') {
+            if (($status eq 'true') && ($httpd eq 'enabled')) {
                 push(@jails, 'apache-'.$_);
             }
         }
         my $phpmyadmin = $db->get_prop('fail2ban', 'ApachePhpMyAdmin_status') || 'true';
-        if ($phpmyadmin eq 'true') {
+        if (($phpmyadmin eq 'true') && ($httpd eq 'enabled')) {
             push(@jails, 'phpmyadmin');
         }
 
