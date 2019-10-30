@@ -50,8 +50,66 @@ sub listAllJails {
     push(@jails, listDovecotJails());
     push(@jails, listHttpdAdminJails());
     push(@jails, listEjabberAuthJails());
+    push(@jails, listMysqldAuthJails());
+    push(@jails, listNextcloudAuthJails());
+    push(@jails, listOwnCloudAuthJails());
+    push(@jails, listNginxHttpAuthJails());
     # ... other jails
 
+    return @jails;
+}
+sub listNginxHttpAuthJails {
+  my @jails;
+  my $db = esmith::ConfigDB->open_ro();
+  my $nginx = $nginx{status} || 'disabled';
+
+  if (-f '/var/log/nginx/error.log') {
+      foreach(qw(HttpAuth BotSearch)) {
+          my $status = $db->get_prop('fail2ban', 'Nginx'.$_.'_status') || 'true';
+          if (($status eq 'true') && ($nginx eq 'enabled')) {
+              $_ =~ s/HttpAuth/http-auth/;
+              push(@jails, 'nginx-'.lc $_);
+          }
+      }
+  }
+  return @jails;
+}
+
+sub listOwncloudAuthJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Owncloud_status') || 'true';
+
+    if (( -f '/var/www/html/owncloud/data/owncloud.log') &&
+      ($status eq 'true') {
+        push(@jails, 'owncloud-auth');
+    }
+    return @jails;
+}
+
+sub listNextcloudAuthJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Nextcloud_status') || 'true';
+
+    if (( -f '/var/lib/nethserver/nextcloud/nextcloud.log') &&
+      ($status eq 'true') {
+        push(@jails, 'nextcloud-auth');
+    }
+    return @jails;
+}
+
+sub listMysqldAuthJails {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $mysqld = $db->get_prop('mysqld', 'status') || 'enabled';
+    my $status = $db->get_prop('fail2ban', 'MysqldAuth_status') || 'true';
+
+    if (( -f '/var/log/mariadb/mariadb.log') &&
+      ($status eq 'true') &&
+      ($mysqld eq 'enabled')) {
+        push(@jails, 'mysqld-auth');
+    }
     return @jails;
 }
 
@@ -61,8 +119,8 @@ sub listEjabberAuthJails {
     my $ejabberd = $db->get_prop('ejabberd', 'status') || 'enabled';
     my $status = $db->get_prop('fail2ban', 'EjabberAuth_status') || 'true';
 
-    if (( -f '/var/log/ejabberd/ejabberd.log') &&  
-      ($status eq 'true') && 
+    if (( -f '/var/log/ejabberd/ejabberd.log') &&
+      ($status eq 'true') &&
       ($ejabberd eq 'enabled')) {
         push(@jails, 'ejabberd-auth');
     }
@@ -76,7 +134,7 @@ sub listHttpdAdminJails {
     my $status = $db->get_prop('fail2ban', 'HttpdAdmin_status') || 'true';
 
     if (( -f '/var/log/httpd-admin/access_log') &&
-      ($status eq 'true') && 
+      ($status eq 'true') &&
       ($httpd_admin eq 'enabled')) {
         push(@jails, 'httpd-admin');
     }
@@ -122,7 +180,7 @@ sub listSSHJails {
     my $status = $db->get_prop('fail2ban', 'Sshd_status') || 'true';
 
     if (( -f '/var/log/secure') &&
-      ($status eq 'true') && 
+      ($status eq 'true') &&
       ($sshd eq 'enabled')) {
         push(@jails, 'sshd');
     }
@@ -133,13 +191,12 @@ sub listApacheErrorJails {
     my @jails;
     my $db = esmith::ConfigDB->open_ro();
     my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
-    my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
 
     if ( -f '/var/log/httpd/error_log') {
-        foreach (qw(auth noscript overflows nohome botsearch modsecurity shellshock scan )) {
+        foreach (qw(Auth Noscript Overflows Nohome Botsearch Modsecurity Shellshock Scan )) {
             my $status = $db->get_prop('fail2ban', 'Apache'.$_.'_status') || 'true';
             if (($status eq 'true') && ($httpd eq 'enabled')) {
-                push(@jails, 'apache-'.$_);
+                push(@jails, 'apache-'.lc $_);
             }
         }
     }
@@ -150,13 +207,12 @@ sub listApacheAccessJails {
     my @jails;
     my $db = esmith::ConfigDB->open_ro();
     my $httpd = $db->get_prop('httpd', 'status') || 'enabled';
-    my $apache = $db->get_prop('fail2ban', 'ApacheAuth_status') || 'true';
 
     if (-f '/var/log/httpd/access_log') {
-        foreach(qw(fakegooglebot badbots)) {
+        foreach(qw(Fakegooglebot Badbots)) {
             my $status = $db->get_prop('fail2ban', 'Apache'.$_.'_status') || 'true';
             if (($status eq 'true') && ($httpd eq 'enabled')) {
-                push(@jails, 'apache-'.$_);
+                push(@jails, 'apache-'.lc $_);
             }
         }
         my $phpmyadmin = $db->get_prop('fail2ban', 'ApachePhpMyAdmin_status') || 'true';
