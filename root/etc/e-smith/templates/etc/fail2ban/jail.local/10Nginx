@@ -1,6 +1,6 @@
 {
     use NethServer::Fail2Ban;
-    return ("\n#apache not used on this server\n") if (! NethServer::Fail2Ban::listNginxHttpAuthJail())
+    return ("\n#nginx not used on this server\n") if (! NethServer::Fail2Ban::listNginxHttpAuthJail())
     my $port = $nginx{TCPPorts} || '80,443';
     my $maxretry = $fail2ban{Nginx_MaxRetry} || $fail2ban{MaxRetry} || '3';
 

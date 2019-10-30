@@ -50,3 +50,25 @@ ignoreip = $ignoreipSaslAbuse
 
 );
 }
+{
+    use NethServer::Fail2Ban;
+    return ("\n#postfix not used on this server\n") if (! NethServer::Fail2Ban::listPostfixJails())
+    my $port = $postfix{TCPPorts}|| '25,465,587';
+    my $maxretry = $fail2ban{Postfix_MaxRetry} || $fail2ban{MaxRetry} || '3';
+    my $postfixSaslAbuseMaxRetry = $fail2ban{PostfixSaslAbuse_MaxRetry} || $postfixretry*33 || '100';
+    my $ignoreipSaslAbuse = $localAccess.','.($fail2ban{PostfixSaslAbuse_IgnoreIP}||'');
+    $ignoreipSaslAbuse =~ s/,/ /g;
+
+    foreach (NethServer::Fail2Ban::listPostfixJails()) {
+        $OUT .= "\n[$_]\n";
+        $OUT .= "enabled = true\n";
+        $OUT .= "port = $port\n";
+        $OUT .= "logpath = /var/log/maillog\n";
+        if ( $_ eq 'postfix-sasl-abuse') {
+            $OUT .= "maxretry = $postfixSaslAbuseMaxRetry\n";
+            $OUT .= "ignoreip = $ignoreipSaslAbuse\n\n";
+        } else {
+            $OUT .= "maxretry = $maxretry\n\n";
+        }
+    }
+}

@@ -54,10 +54,165 @@ sub listAllJails {
     push(@jails, listNextcloudAuthJails());
     push(@jails, listOwnCloudAuthJails());
     push(@jails, listNginxHttpAuthJails());
+    push(@jails, listOpenVpnAuthJails());
+    push(@jails, listPamGenericJails());
+    push(@jails, listPostfixJails());
+    push(@jails, listRecidiveJails());
+    push(@jails, listRoundcubeJails());
+    push(@jails, listRspamdJails());
+    push(@jails, listSieveJails());
+    push(@jails, listSogoJails());
+    push(@jails, listUrbackupJails());
+    push(@jails, listVsftpdJails());
+    push(@jails, listWebtopJails());
     # ... other jails
 
     return @jails;
 }
+
+sub listWebtopJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Webtop_status') || 'true';
+
+    if (( -f '/var/lib/tomcats/webtop/logs/localhost_access_log.txt') &&
+      ($status eq 'true')) {
+        push(@jails, 'webtop');
+    }
+    return @jails;
+}
+
+sub listVsftpdJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Vsftpd_status') || 'true';
+    my $ftp = $vsftpd{status} || 'disabled';
+
+    if (( -f '/var/log/vsftpd.log') &&
+      ($status eq 'true') &&
+      ($ftp eq 'enabled')) {
+        push(@jails, 'vsftpd');
+    }
+    return @jails;
+}
+
+sub listUrbackupJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Urbackup_status') || 'true';
+
+    if (( -f '/var/log/urbackup.log') &&
+      ($status eq 'true')) {
+        push(@jails, 'urbackup-auth');
+    }
+    return @jails;
+}
+
+sub listSogoJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'SogoAuth_status') || 'true';
+
+    if (( -f '/var/log/sogo/sogo.log') &&
+      ($status eq 'true')) {
+        push(@jails, 'sogo-auth');
+    }
+    return @jails;
+}
+
+sub listSieveJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Sieve_status') || 'true';
+
+    if (( -f '/var/log/imap') &&
+      ($status eq 'true')) {
+        push(@jails, 'sieve');
+    }
+    return @jails;
+}
+
+sub listRspamdJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Rspamd_status') || 'true';
+
+    if (( -f '/var/log/httpd-admin/access_log') &&
+      ($status eq 'true')) {
+        push(@jails, 'rspamd');
+    }
+    return @jails;
+}
+
+sub listRoundcubeJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'Roundcube_status') || 'true';
+
+    if (( -f '/var/log/roundcubemail/errors.log') &&
+      ($status eq 'true')) {
+        push(@jails, 'roundcube-auth');
+    }
+    return @jails;
+}
+
+sub listRecidiveJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $fail2ban{Recidive_status} || 'true';
+
+    if (( -f '/var/log/fail2ban.log') &&
+      ($status eq 'true')) {
+        push(@jails, 'recidive');
+    }
+    return @jails;
+}
+
+sub listPostfixJails {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $postfix = $db->get_prop('postfix', 'status') || 'enabled';
+
+    if (-f '/var/log/maillog') {
+        foreach(qw(Postfix PostfixRbl postfix-ddos postfix-sasl PostfixSaslAbuse)) {
+            my $status = $db->get_prop('fail2ban', $_.'_status') || 'true';
+            if (($status eq 'true') && ($postfix eq 'enabled')) {
+               $_ =~ s/PostfixSaslAbuse/postfix-sasl-abuse/;
+               $_ =~ s/PostfixRbl/postfix-rbl/;
+                push(@jails, lc $_);
+            }
+        }
+    }
+    return @jails;
+}
+
+sub listPamGenericJails {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $db->get_prop('fail2ban', 'PamGeneric_status') || 'true';
+
+    if ( -f '/var/log/secure') {
+        foreach (qw( pam-generic pam-generic-nethserver )) {
+            if ($status eq 'true') {
+                push(@jails, $_);
+            }
+        }
+    }
+    return @jails;
+}
+
+sub listOpenVpnAuthJails() {
+    my @jails;
+    my $db = esmith::ConfigDB->open_ro();
+    my $status = $fail2ban{OpenVpnAuth_status} || 'true';
+
+    if (( -f '/var/log/openvpn/openvpn.log') &&
+      ($status eq 'true')) {
+        push(@jails, 'openvpn');
+    }
+    return @jails;
+}
+
 sub listNginxHttpAuthJails {
   my @jails;
   my $db = esmith::ConfigDB->open_ro();
@@ -81,7 +236,7 @@ sub listOwncloudAuthJails() {
     my $status = $db->get_prop('fail2ban', 'Owncloud_status') || 'true';
 
     if (( -f '/var/www/html/owncloud/data/owncloud.log') &&
-      ($status eq 'true') {
+      ($status eq 'true')) {
         push(@jails, 'owncloud-auth');
     }
     return @jails;
@@ -93,7 +248,7 @@ sub listNextcloudAuthJails() {
     my $status = $db->get_prop('fail2ban', 'Nextcloud_status') || 'true';
 
     if (( -f '/var/lib/nethserver/nextcloud/nextcloud.log') &&
-      ($status eq 'true') {
+      ($status eq 'true')) {
         push(@jails, 'nextcloud-auth');
     }
     return @jails;

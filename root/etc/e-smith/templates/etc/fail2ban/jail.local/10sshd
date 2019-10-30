@@ -1,4 +1,3 @@
-
 {
     use NethServer::Fail2Ban;
     my $port = $sshd{TCPPort} || '22';

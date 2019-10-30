@@ -2,7 +2,7 @@
     use NethServer::Fail2Ban;
     my $port = $httpd{TCPPorts} || '80,443';
     my $maxretry = $fail2ban{Owncloud_MaxRetry} || $fail2ban{MaxRetry} || '3';
-    return ("\n#nextcloud not used on this server\n") if (! NethServer::Fail2Ban::listOwncloudAuthJails());
+    return ("\n#owncloud not used on this server\n") if (! NethServer::Fail2Ban::listOwncloudAuthJails());
 
     foreach (NethServer::Fail2Ban::listOwncloudAuthJails()) {
         $OUT .= "\n[$_]\n";
