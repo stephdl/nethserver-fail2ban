@@ -67,6 +67,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc COPYING
 %dir %{_nseventsdir}/%{name}-update
+%config(noreplace) /etc/fail2ban/filter.d/urbackup-auth.conf
 
 %changelog
 * Tue Nov 12 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.1-1
